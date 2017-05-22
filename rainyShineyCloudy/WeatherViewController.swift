@@ -17,11 +17,16 @@ class WeatherViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var weatherLabel: UILabel!
     @IBOutlet weak var forcastTable: UITableView!
     
+    var currentWeather = CurrentWeather()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         forcastTable.delegate = self
         forcastTable.dataSource = self
         
+        currentWeather.downloadWeatherDetails {
+        
+        }
         // Do any additional setup after loading the view, typically from a nib.
     }
 
