@@ -6,15 +6,15 @@
 //  Copyright © 2017 neil mallory. All rights reserved.
 //
 
-import UIKit
+import Foundation
 import Alamofire
 
 class CurrentWeather  {
     
-    var _cityName: String!
-    var _date: String!
-    var _weatherType: String!
-    var _currentTemp: Double!
+    private var _cityName: String!
+    private var _date: String!
+    private var _weatherType: String!
+    private var _currentTemp: Double!
     
     var cityName: String{
         if _cityName == nil {
@@ -50,7 +50,7 @@ class CurrentWeather  {
         return _currentTemp
     }
     
-    func downloadWeatherDetails(completed: DownloadComplete)  {
+    func downloadWeatherDetails(completed: @escaping DownloadComplete)  {
         
         // alamofire download
         let currentWeatherURL = URL(string: CURRENT_WEATHER_URL)!
@@ -77,18 +77,20 @@ class CurrentWeather  {
                 if let main = dict["main"] as? Dictionary<String, Any> {
                     if let tempKelvin = main["temp"] as? Double {
                         let tempCelcius = tempKelvin - ZERO_DEGREE_C_IN_KELVINS
-                        self._currentTemp = tempCelcius
+                        self._currentTemp = ((tempCelcius*10).rounded())/10
                     }
                 }
             }
             
-            // debug
-            print("city name = \(self._cityName!)")
-            print("weather type = \(self._weatherType!)")
-            print("temp = \(self._currentTemp!)")
+            // DEBUG
+            //print("city name = \(self.cityName)")
+            //print("weather type = \(self.weatherType)")
+            //print("temp = \(self.currentTemp)")
+        
+            completed()
         }
         
-        completed()
+        //completed()
     }
     
 }
