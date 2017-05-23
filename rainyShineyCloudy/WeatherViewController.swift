@@ -8,8 +8,9 @@
 
 import UIKit
 import Alamofire
+import CoreLocation
 
-class WeatherViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class WeatherViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, CLLocationManagerDelegate {
 
     @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var temperatureLabel: UILabel!
@@ -18,26 +19,52 @@ class WeatherViewController: UIViewController, UITableViewDelegate, UITableViewD
     @IBOutlet weak var weatherLabel: UILabel!
     @IBOutlet weak var forcastTable: UITableView!
     
+    let locationManager = CLLocationManager()
+    var currentLoaction: CLLocation!
+    
     var currentWeather: CurrentWeather!
     var forcast: Forcast!
     var forecasts = [Forcast]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startMonitoringSignificantLocationChanges()
+        
         forcastTable.delegate = self
         forcastTable.dataSource = self
         
         // create instances
         currentWeather = CurrentWeather()
         
+        // Do any additional setup after loading the view, typically from a nib.
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        locationAuthStatus()
+    }
+    
+    func locationAuthStatus(){
+        if CLLocationManager.authorizationStatus() == .authorizedWhenInUse{
+            currentLoaction = locationManager.location
+            Location.sharedInstance.latitude = currentLoaction.coordinate.latitude
+            Location.sharedInstance.longitude = currentLoaction.coordinate.longitude
+        } else {
+            locationManager.requestWhenInUseAuthorization()
+            locationAuthStatus()
+        }
         currentWeather.downloadWeatherDetails {
             self.downloadForecastData {
                 self.updateMainUI()
             }
         }
-        // Do any additional setup after loading the view, typically from a nib.
-    }
 
+    }
+    
     func downloadForecastData(completed: @escaping DownloadComplete){
         // down load the forcast data for the table view
         
